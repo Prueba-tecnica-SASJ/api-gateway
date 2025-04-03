@@ -8,7 +8,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { NATS_SERVICE } from 'src/config';
+import { envs, NATS_SERVICE } from 'src/config';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { firstValueFrom } from 'rxjs';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -69,6 +69,23 @@ export class AuthService {
       };
     } catch (error) {
       throw new RpcException(error);
+    }
+  }
+
+  verifyToken(token: string) {
+    try {
+      const { sub, iat, exp, ...user } = this.jwtService.verify(token, {
+        secret: envs.jwtSecret,
+      });
+
+      return {
+        user: user,
+      };
+    } catch (error) {
+      throw new RpcException({
+        status: 401,
+        message: 'Invalid token',
+      });
     }
   }
 

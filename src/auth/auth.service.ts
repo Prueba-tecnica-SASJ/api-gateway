@@ -1,32 +1,22 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { JwtService } from '@nestjs/jwt';
+
 import * as bcrypt from 'bcrypt';
+import { firstValueFrom } from 'rxjs';
 
 import { envs, NATS_SERVICE } from 'src/config';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { firstValueFrom } from 'rxjs';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
-  //   private logger = new Logger('UsersService');
   constructor(
     @Inject(NATS_SERVICE) private readonly client: ClientProxy,
     private readonly jwtService: JwtService,
   ) {}
 
-  /**
-   * Registra un usuario.
-   * @param registerUserDto DTO para registrar un usuario.
-   * @returns Información del usuario y el token.
-   */
   async register(registerUserDto: RegisterUserDto) {
     try {
       const { password, ...userData } = registerUserDto;
